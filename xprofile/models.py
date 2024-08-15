@@ -29,6 +29,7 @@ class Profile(models.Model):
 
     code = models.CharField(max_length=8, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
     __previous_last_name    = None
     __previous_first_name   = None
