@@ -30,11 +30,15 @@ class Profile(models.Model):
     code = models.CharField(max_length=8, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    __previous_last_name    = None
+    __previous_first_name   = None
+    __previous_logged_state = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__previuos_logged_state = self.logged
-        self.__previuos_last_name = self.last_name
-        self.__previus_first_name = self.first_name
+        self.__previuos_last_name = ''
+        self.__previus_first_name = ''
+        self.__previuos_logged_state = False
 
     def __str__(self):
         return self.username
