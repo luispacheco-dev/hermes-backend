@@ -11,10 +11,10 @@ class CreateUserProfileView(views.APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        user_profile_serializer = UserProfileSerializer(data=request.data)
+        payload = request.data
+        user_profile_serializer = UserProfileSerializer(data=payload)
         if not user_profile_serializer.is_valid():
             return Response(data=user_profile_serializer.errors, status=400)
-        payload = user_profile_serializer.data
         try:
             user = CustomUser.objects.create_user(**payload['user'])
             profile = Profile.objects.create(user=user, **payload['profile'])
