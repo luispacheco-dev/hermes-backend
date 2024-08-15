@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from .utils import get_upload_path
+from .utils import get_friend_code
 from .managers import CustomUserManager
 from django.contrib.auth.models import AbstractUser
 
@@ -45,6 +46,9 @@ class Profile(models.Model):
         return self.username
 
     def save(self, *args, **kwargs):
+        if not self.pk:
+            self.code = get_friend_code(Profile)
+            self.username = f"{self.first_name} {self.last_name}"
         if self.logged != self.__previuos_logged_state:
             self.last_login = timezone.now()
             self.__previuos_logged_state = self.logged
