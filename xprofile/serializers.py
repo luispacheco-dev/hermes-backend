@@ -15,7 +15,7 @@ class ProfileModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = '__all__'
+        exclude = ['user']
         read_only_fields = ['code', 'username', 'last_login', 'created_at']
 
 
