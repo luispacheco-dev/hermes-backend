@@ -36,9 +36,9 @@ class Profile(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__previuos_last_name = ''
-        self.__previus_first_name = ''
-        self.__previuos_logged_state = False
+        self.__previuos_logged_state = self.logged
+        self.__previuos_last_name = self.last_name
+        self.__previus_first_name = self.first_name
 
     def __str__(self):
         return self.username
