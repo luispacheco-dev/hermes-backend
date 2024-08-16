@@ -22,3 +22,13 @@ class CreateUserProfileView(views.APIView):
             print(e)
             return Response(data={'error(s)': 'Internal Error'}, status=500)
         return Response(data=ProfileModelSerializer(profile).data, status=201)
+
+
+class ProfileByIdView(views.APIView):
+
+    def get(self, request, id):
+        try:
+            profile = Profile.objects.get(id=id)
+        except Profile.DoesNotExist:
+            return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
+        return Response(data=ProfileModelSerializer(profile).data, status=200)
