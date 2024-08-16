@@ -1,6 +1,7 @@
 from .models import Profile
 from .models import CustomUser
 from rest_framework import views
+from xfriend.models import FriendRequest
 from rest_framework.response import Response
 from .serializers import UserProfileSerializer
 from .serializers import ProfileModelSerializer
@@ -80,3 +81,23 @@ class ProfileByIdLoggedView(views.APIView):
         profile.logged = payload['logged']
         profile.save()
         return Response(data={'logged': payload['logged']}, status=200)
+
+
+class GetProfileFriendRequestView(views.APIView):
+
+    def get(self, request, id):
+        try:
+            profile = Profile.objects.get(id=id)
+        except Profile.DoesNotExist:
+            return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
+        if request.user != profile.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        friend_request_serializers = []
+        friend_requests = FriendRequest.objects.filter(code=profile.code)
+        for friend_request in friend_requests:
+            friend_request_serializer = dict()
+            friend_request_serializer['id'] = friend_request.id
+            friend_request_serializer['requested_at'] = friend_request.requested_at
+            friend_request_serializer['profile'] = ProfileModelSerializer(friend_request.sender).data
+            friend_request_serializers.append(friend_request_serializer)
+        return Response(data=friend_request_serializers, status=200)
