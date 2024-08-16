@@ -101,3 +101,24 @@ class GetProfileFriendRequestView(views.APIView):
             friend_request_serializer['profile'] = ProfileModelSerializer(friend_request.sender).data
             friend_request_serializers.append(friend_request_serializer)
         return Response(data=friend_request_serializers, status=200)
+
+
+class DeleteProfileFriendRequestView(views.APIView):
+
+    def delete(self, request, p_id, r_id):
+        try:
+            profile = Profile.objects.get(id=p_id)
+        except Profile.DoesNotExist:
+            return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
+        if request.user != profile.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        try:
+            friend_request = FriendRequest.objects.get(id=r_id)
+        except FriendRequest.DoesNotExist:
+            return Response(data={'error(s)': "Friend Request Doesn't Exist"})
+        try:
+            friend_request.delete()
+        except Exception as e:
+            print(e)
+            return Response(data={'error(s)': 'Internal Error'}, status=500)
+        return Response(status=200)
