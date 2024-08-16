@@ -32,3 +32,17 @@ class ProfileByIdView(views.APIView):
         except Profile.DoesNotExist:
             return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
         return Response(data=ProfileModelSerializer(profile).data, status=200)
+
+    def delete(self, request, id):
+        try:
+            profile = Profile.objects.get(id=id)
+        except:
+            return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
+        if request.user != profile.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        try:
+            request.user.delete()
+        except Exception as e:
+            print(e)
+            return Response(data={'error(s)': 'Internal Error'}, status=500)
+        return Response(status=200)
