@@ -9,4 +9,5 @@ app_name = 'xauth'
 urlpatterns = [
     path('token/', CustomTokenObtainPairView.as_view(), name='token'),
     path('token/verify/', TokenVerifyView.as_view(), name='token-verify'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
 ]
