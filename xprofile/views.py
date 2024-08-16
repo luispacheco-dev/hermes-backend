@@ -46,3 +46,20 @@ class ProfileByIdView(views.APIView):
             print(e)
             return Response(data={'error(s)': 'Internal Error'}, status=500)
         return Response(status=200)
+
+    def patch(self, request, id):
+        try:
+            profile = Profile.objects.get(id=id)
+        except:
+            return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
+        if request.user != profile.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        payload = request.data
+        profile_serializer = ProfileModelSerializer(data=payload)
+        if not profile_serializer.is_valid():
+            return Response(data=profile_serializer.errors, status=400)
+        profile.last_name = payload['last_name']
+        profile.first_name = payload['first_name']
+        profile.picture = profile.picture if 'picture' not in payload else payload['picture']
+        profile.save()
+        return Response(data=ProfileModelSerializer(profile).data, status=200)
