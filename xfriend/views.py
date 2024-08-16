@@ -16,14 +16,15 @@ class CreateFriendRequestView(views.APIView):
             profile = Profile.objects.get(id=payload['sender'])
         except Profile.DoesNotExist:
             return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
-        if request.user != profile:
+        if request.user != profile.user:
             return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
         if len(Profile.objects.filter(code=payload['code'])) == 0:
             return Response(data={'error(s)': "Code Doesn't Exist"}, status=400)
         if len(FriendRequest.objects.filter(sender=profile, code=payload['code'])) != 0:
             return Response(data={'error(s)': 'Friend Request Already Exist'}, status=400)
         try:
-            friend_request = FriendRequest.objects.create(**payload)
+            payload.pop('sender')
+            friend_request = FriendRequest.objects.create(sender=profile, **payload)
         except Exception as e:
             print(e)
             return Response(data={'error(s)': 'Internal Error'}, status=500)
