@@ -1,6 +1,8 @@
 from .models import Profile
 from .models import CustomUser
+from django.db.models import Q
 from rest_framework import views
+from xfriend.models import Friend
 from xfriend.models import FriendRequest
 from rest_framework.response import Response
 from .serializers import UserProfileSerializer
@@ -122,3 +124,24 @@ class DeleteProfileFriendRequestView(views.APIView):
             print(e)
             return Response(data={'error(s)': 'Internal Error'}, status=500)
         return Response(status=200)
+
+
+class GetProfileFriends(views.APIView):
+
+    def get(self, request, id):
+        try:
+            profile = Profile.objects.get(id=id)
+        except Profile.DoesNotExist:
+            return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
+        if request.user != profile.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        friend_serializers = []
+        friends = Friend.objects.filter(Q(sender=profile) | Q(receiver=profile))
+        for friend in friends:
+            friend_serializer = dict()
+            friend_serializer['id'] = friend.id
+            friend_serializer['began_at'] = friend.began_at
+            profile_ = friend.sender if profile != friend.sender else friend.receiver
+            friend_serializer['profile'] = ProfileModelSerializer(profile_).data
+            friend_serializers.append(friend_serializer)
+        return Response(data=friend_serializers, status=200)
