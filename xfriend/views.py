@@ -1,4 +1,5 @@
 from .models import Friend
+from django.db.models import Q
 from rest_framework import views
 from .models import FriendRequest
 from xprofile.models import Profile
@@ -64,3 +65,25 @@ class CreateFriendView(views.APIView):
             print(e)
             return Response(data={'error(s)': 'Internal Error'}, status=500)
         return Response(data=FriendModelSerializer(friend).data, status=201)
+
+
+class DeleteFriendView(views.APIView):
+
+    def delete(self, request, id):
+        try:
+            friend = Friend.objects.get(id=id)
+        except Friend.DoesNotExist:
+            return Response(data={'error(s)': "Friend Doesn't Exist"}, status=400)
+        if request.user != friend.sender.user and request.user != friend.receiver.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        friend_request = FriendRequest.objects.filter(
+            Q(sender=friend.sender, code=friend.receiver.code) |
+            Q(sender=friend.receiver, code=friend.sender.code)
+        ).first()
+        try:
+            friend.delete()
+            friend_request.delete()
+        except Exception as e:
+            print(e)
+            return Response(data={'error(s)': 'Internal Error'}, status=500)
+        return Response(status=200)
