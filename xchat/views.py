@@ -1,8 +1,11 @@
 from .models import Chat
+from .models import Message
 from rest_framework import views
 from xfriend.models import Friend
+from xprofile.models import Profile
 from rest_framework.response import Response
 from .serializers import ChatModelSerializer
+from .serializers import MessageModelSerializer
 
 
 class CreateChatView(views.APIView):
@@ -26,3 +29,31 @@ class CreateChatView(views.APIView):
             print(e)
             return Response(data={'error(s)': 'Internal Error'}, status=500)
         return Response(data=ChatModelSerializer(chat).data, status=201)
+
+
+class CreateMessageView(views.APIView):
+
+    def post(self, request, id):
+        try:
+            chat = Chat.objects.get(id=id)
+        except Chat.DoesNotExist:
+            return Response(data={'error(s)': "Chat Doesn't Exist"}, status=400)
+        payload = request.data
+        message_serializer = MessageModelSerializer(data=payload)
+        if not message_serializer.is_valid():
+            return Response(data=message_serializer.errors, status=400)
+        try:
+            profile = Profile.objects.get(id=payload['sender'])
+        except Profile.DoesNotExist:
+            return Response(data={'error(s)': "Sender Doesn't Exist"}, status=400)
+        if request.user != profile.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        if profile != chat.friend.sender and profile != chat.friend.receiver:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        try:
+            payload.pop('sender')
+            message = Message.objects.create(chat=chat, sender=profile, **payload)
+        except Exception as e:
+            print(e)
+            return Response(data={'error(s)': 'Internal Error'}, status=500)
+        return Response(data=MessageModelSerializer(message).data, status=201)
