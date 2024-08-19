@@ -15,4 +15,4 @@ class MessageModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = '__all__'
-        read_only_fields = ['readed', 'created_at']
+        read_only_fields = ['readed', 'created_at', 'chat']
