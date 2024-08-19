@@ -68,3 +68,21 @@ class MessagesView(views.APIView):
         messages = Message.objects.filter(chat=chat)
         messages = [MessageModelSerializer(message).data for message in messages]
         return Response(data=messages, status=200)
+
+
+class ReadMessagesView(views.APIView):
+
+    def patch(self, request, id):
+        try:
+            chat = Chat.objects.get(id=id)
+        except Chat.DoesNotExist:
+            return Response(data={'error(s)': "Chat Doesn't Exist"}, status=400)
+        if request.user != chat.friend.sender.user and request.user != chat.friend.receiver.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        profile = chat.friend.sender if chat.friend.sender.user != request.user else chat.friend.receiver
+        try:
+            Message.objects.filter(chat=chat, sender=profile).update(readed=True)
+        except Exception as e:
+            print(e)
+            return Response(data={'error(s)': 'Internal Error'}, status=500)
+        return Response(status=200)
