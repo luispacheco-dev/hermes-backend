@@ -1,7 +1,9 @@
 from .models import Profile
+from xchat.models import Chat
 from .models import CustomUser
 from django.db.models import Q
 from rest_framework import views
+from xchat.models import Message
 from xfriend.models import Friend
 from xfriend.models import FriendRequest
 from rest_framework.response import Response
@@ -145,3 +147,30 @@ class GetProfileFriends(views.APIView):
             friend_serializer['profile'] = ProfileModelSerializer(profile_).data
             friend_serializers.append(friend_serializer)
         return Response(data=friend_serializers, status=200)
+
+
+class GetProfileChats(views.APIView):
+
+    def get(self, request, id):
+        try:
+            profile = Profile.objects.get(id=id)
+        except Profile.DoesNotExist:
+            return Response(data={'error(s)': "Profile Doesn't Exist"}, status=400)
+        if request.user != profile.user:
+            return Response(data={'error(s)': 'Forbidden Resource'}, status=403)
+        chat_serializers = []
+        friends = Friend.objects.filter(Q(sender=profile) | Q(receiver=profile))
+        for friend in friends:
+            try:
+                chat = Chat.objects.get(friend=friend)
+            except Chat.DoesNotExist:
+                continue
+            chat_serializer = dict()
+            chat_serializer['id'] = chat.id
+            last_message = Message.objects.filter(chat=chat).last()
+            chat_serializer['last_message'] = last_message if last_message != [] else None
+            profile_ = friend.sender if profile != friend.sender else friend.receiver
+            chat_serializer['profile'] = ProfileModelSerializer(profile_).data
+            chat_serializer['nrm'] = len(Message.objects.filter(chat=chat, readed=False, sender=profile_))
+            chat_serializers.append(chat_serializer)
+        return Response(data=chat_serializers, status=200)
