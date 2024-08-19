@@ -1,4 +1,5 @@
 from django.urls import path
+from .views import GetProfileChats
 from .views import ProfileByIdView
 from .views import GetProfileFriends
 from .views import CreateUserProfileView
@@ -12,6 +13,7 @@ app_name = 'xprofile'
 urlpatterns = [
     path('<int:id>/', ProfileByIdView.as_view(), name='profile-by-id'),
     path('', CreateUserProfileView.as_view(), name='create-user-profile'),
+    path('<int:id>/chats/', GetProfileChats.as_view(), name='profile-chats'),
     path('<int:id>/friends/', GetProfileFriends.as_view(), name='profile-friends'),
     path('<int:id>/logged/', ProfileByIdLoggedView.as_view(), name='profile-by-id-logged'),
     path('<int:id>/friend-requests/', GetProfileFriendRequestView.as_view(), name='profile-by-id-friend-requests'),
