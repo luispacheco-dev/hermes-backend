@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from .serializers import UserProfileSerializer
 from .serializers import ProfileModelSerializer
 from rest_framework.permissions import AllowAny
+from xchat.serializers import MessageModelSerializer
 
 
 class CreateUserProfileView(views.APIView):
@@ -168,7 +169,7 @@ class GetProfileChats(views.APIView):
             chat_serializer = dict()
             chat_serializer['id'] = chat.id
             last_message = Message.objects.filter(chat=chat).last()
-            chat_serializer['last_message'] = last_message if last_message != [] else None
+            chat_serializer['last_message'] = MessageModelSerializer(last_message).data if last_message != [] else None
             profile_ = friend.sender if profile != friend.sender else friend.receiver
             chat_serializer['profile'] = ProfileModelSerializer(profile_).data
             chat_serializer['nrm'] = len(Message.objects.filter(chat=chat, readed=False, sender=profile_))
