@@ -102,6 +102,7 @@ class GetProfileFriendRequestView(views.APIView):
         for friend_request in friend_requests:
             friend_request_serializer = dict()
             friend_request_serializer['id'] = friend_request.id
+            friend_request_serializer['greetings'] = friend_request.greetings
             friend_request_serializer['requested_at'] = friend_request.requested_at
             friend_request_serializer['profile'] = ProfileModelSerializer(friend_request.sender).data
             friend_request_serializers.append(friend_request_serializer)
