@@ -64,6 +64,11 @@ class CreateFriendView(views.APIView):
         except Exception as e:
             print(e)
             return Response(data={'error(s)': 'Internal Error'}, status=500)
+        try:
+            FriendRequest.objects.get(sender=sender_profile, code=receiver_profile.code).delete()
+        except Exception as e:
+            print(e)
+            return Response(data={'error(s)': 'Internal Error'}, status=500)
         return Response(data=FriendModelSerializer(friend).data, status=201)
 
 
@@ -82,7 +87,6 @@ class DeleteFriendView(views.APIView):
         ).first()
         try:
             friend.delete()
-            friend_request.delete()
         except Exception as e:
             print(e)
             return Response(data={'error(s)': 'Internal Error'}, status=500)
