@@ -11,6 +11,6 @@ class ChatConsumer(WebsocketConsumer):
         pass
 
     def receive(self, text_data):
-        text_data_json = json.load(text_data)
+        text_data_json = json.loads(text_data)
         content = text_data_json['content']
-        self.send(text_data=json.dump({'content': content}))
+        self.send(text_data=json.dumps({'content': content}))
